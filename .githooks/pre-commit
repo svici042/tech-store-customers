@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Block commits if Gitleaks finds secrets in staged changes.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "ERROR: Gitleaks is not installed."
+  exit 1
+fi
+
+gitleaks git --staged --redact
