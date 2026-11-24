@@ -30,7 +30,7 @@ For development:
 npm run dev
 ```
 
-The server runs at `http://localhost:3000`.
+The server listens on `http://127.0.0.1:3000` and is only accessible from your own computer.
 
 ## API Endpoints
 
@@ -48,6 +48,8 @@ Example JSON body:
 ```
 
 Returns HTTP 201 when the customer is created.
+
+Send both fields as JSON strings. The API trims whitespace, requires a name of 1–100 characters and an email of up to 254 characters in a basic email format. Invalid input and malformed JSON return HTTP 400.
 
 ### GET /customers
 
@@ -83,12 +85,16 @@ All assignment requirements were tested successfully.
 
 ## Security
 
-The database file and `node_modules` are excluded from Git.
+Git ignores the SQLite database and its sidecar files, `.env`, and `node_modules`.
 
-I also ran `npm audit`.
+Install Gitleaks and make sure it's on your PATH. Run this once in each clone to enable the Git hooks:
 
-The audit reported two moderate vulnerability findings related to Sequelize 6 and its `uuid` dependency.
+```bash
+git config core.hooksPath .githooks
+```
 
-I kept Sequelize 6 because this assignment uses the Sequelize v6 documentation. The dependency warning remains unresolved.
+The hooks check staged changes before a commit and scan Git history before a push. A missing Gitleaks installation or a failed scan blocks the operation.
 
-This project is intended for local learning and testing, not production use.
+GitHub Actions scans Git history with Gitleaks and checks the lockfile with `npm run security:audit` on pull requests and pushes to `main`. The audit fails on moderate or higher findings.
+
+The audit currently reports two moderate findings for one [UUID vulnerability](https://github.com/advisories/GHSA-w5hq-g745-h8pq). Sequelize 6.37.8 depends on `uuid@^8.3.2`, while the first patched version is 11.1.1. The assignment uses Sequelize 6, and no compatible update was available.
