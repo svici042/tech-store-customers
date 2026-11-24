@@ -4,7 +4,7 @@ const Customer = require("./models/Customer");
 
 const app = express();
 const HOST = "127.0.0.1";
-const PORT = 3000;
+const PORT = Number(process.env.PORT?.trim() || 3000);
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/;
 
 app.use(express.json());
@@ -61,19 +61,25 @@ app.use((error, req, res, next) => {
 // Connect to the database before starting Express.
 async function startServer() {
   try {
+    if (!Number.isInteger(PORT) || PORT < 0 || PORT > 65535) {
+      throw new Error("PORT must be an integer between 0 and 65535.");
+    }
+
     await sequelize.authenticate();
     console.log("Database connected successfully.");
 
     await sequelize.sync();
     console.log("Database tables synchronized.");
 
-    app.listen(PORT, HOST, (error) => {
+    const server = app.listen(PORT, HOST, (error) => {
       if (error) {
         console.error("Unable to listen:", error);
         process.exitCode = 1;
         return;
       }
-      console.log(`Server running at http://${HOST}:${PORT}`);
+      // Port 0 asks the OS to assign a free port.
+      const { address, port } = server.address();
+      console.log(`Server running at http://${address}:${port}`);
     });
   } catch (error) {
     console.error("Unable to start the server:", error);

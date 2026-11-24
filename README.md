@@ -97,4 +97,6 @@ The hooks check staged changes before a commit and scan Git history before a pus
 
 GitHub Actions scans Git history with Gitleaks and checks the lockfile with `npm run security:audit` on pull requests and pushes to `main`. The audit fails on moderate or higher findings.
 
-The audit currently reports two moderate findings for one [UUID vulnerability](https://github.com/advisories/GHSA-w5hq-g745-h8pq). Sequelize 6.37.8 depends on `uuid@^8.3.2`, while the first patched version is 11.1.1. The assignment uses Sequelize 6, and no compatible update was available.
+Sequelize 6.37.8 still asks for `uuid@^8.3.2`. The npm override selects `uuid@11.1.1` for Sequelize to fix [GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq). This crosses Sequelize's declared version range. Review the override when updating Sequelize and remove it once Sequelize v6 declares a patched UUID dependency.
+
+Run `npm ci` and then `npm test`. The tests check Sequelize's UUID defaults, query and transaction IDs, PostgreSQL delimiter generation, and UUID buffer boundaries. The customer API tests use a temporary SQLite database and a free port assigned by the operating system. They check validation and persistence after a restart.
